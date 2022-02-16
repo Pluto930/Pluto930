@@ -1,0 +1,81 @@
+import java.util.HashMap;
+import java.util.HashSet;
+
+/*
+给定两个节点，判断他们的最低公共祖先
+ */
+public class LowerCommonAncestor {
+    private static class Node {
+        int value;
+        Node left;
+        Node right;
+
+        public Node(int data) {
+            this.value = data;
+        }
+
+        @Override
+        public String toString() {
+            return "Node{" +
+                    "value=" + value +
+                    '}';
+        }
+    }
+
+    public static Node lca(Node head,Node n1,Node n2){
+        HashMap<Node,Node> hs=new HashMap<>();
+        process(head,hs);  //递归遍历 将所有节点和它的父节点添加进hashmap
+        hs.put(head,head);  //因为process不会添加头节点
+
+        HashSet<Node> set=new HashSet<>();
+        Node cur=n1;
+
+        while(cur!=hs.get(cur)){   //遍历n1的所有父节点加自己 进入set呢
+            set.add(cur);
+            cur=hs.get(cur);
+        }
+        set.add(head);
+
+        cur=n2;
+        while(set.add(n2)){  //如果包含cur  就代表这是他们的最低祖先节点  不包含 就继续向上遍历n2的父节点
+            cur=hs.get(cur);
+        }
+        return cur;
+    }
+
+    public static void process(Node head, HashMap<Node,Node> hs){ //遍历 都添加进map中
+        if(head == null) return;
+        if(head.left!=null) hs.put(head.left,head);
+        if(head.right!=null) hs.put(head.right,head);
+        process(head.left,hs);
+        process(head.right,hs);
+    }
+
+    public static Node lowestCommonAncestor(Node head,Node n1,Node n2){  //最优化版本
+        if(head == null||head == n1 || head ==n2) return head;
+
+        Node left=lowestCommonAncestor(head.left,n1,n2);
+        Node right=lowestCommonAncestor(head.right,n1,n2);
+
+        if(left!= null && right != null) return head;  //全不空 则返回自己 说明这两个点在此处相遇
+
+        return left==null?right:left;  //在排除全不空的情况下 到此处 左为空 返回右（若都为空 则代表此处子节点没有n1 n2 直接返回null）
+    }
+
+    public static void main(String[] args) {
+        Node n1 = new Node(5);
+        Node n2 = new Node(3);
+        Node n3 = new Node(7);
+        Node n4 = new Node(1);
+        Node n5 = new Node(4);
+        Node n6 = new Node(8);
+
+        n1.left = n2;
+        n1.right = n3;
+        n2.left = n4;
+        n2.right = n5;
+        n3.left = n6;
+
+        System.out.println(lca(n1,n2,n4));
+    }
+}
