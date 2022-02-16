@@ -1,0 +1,154 @@
+/*
+两个有环或无环的链表，可能产生相交 求出是否相交，若相交，求出相交部分的第一个节点
+时间复杂度O(N)  空间复杂度O(1)
+ */
+public class CrossNodeTest {
+    private static class Node {
+        public int value;
+        public Node next;
+
+        public Node(int data) {
+            this.value = data;
+        }
+    }
+
+    //主要函数
+    public static Node getIntersectNode(Node head1, Node head2) {
+        if (head1 == null || head2 == null) return null;
+        Node loop1 = getLoopNode(head1);
+        Node loop2 = getLoopNode(head2);
+
+        if (loop1 == null && loop2 == null) return noLoop(head1, head2);   //都无环，进入方法
+
+        if (loop1 != null && loop2 != null) return bothLoop(head1, head2, loop1, loop2);  //两个都有环，进入方法
+
+        return oneLoop(head1, head2);   //无相交，直接返回null也可
+
+    }
+
+    //判断是否有环，有则返回第一个入环节点,无返回null
+    public static Node getLoopNode(Node head) {
+        if (head == null || head.next == null || head.next.next == null) {
+            return null;
+        }
+
+        Node fast = head.next.next;
+        Node low = head.next;
+
+        while (fast != low) {   //第一次遇到
+            if (fast == null || fast.next == null) {  //这步的意思：当快指针走完了，还没遇到慢指针，说明没有环
+                return null;
+            }
+            fast = fast.next.next;
+            low = low.next;
+
+        }
+
+        fast = head;   //遇到后，fast回到原点
+        while (fast != low) {    //从此刻开始，双指针每次都移动一个节点，再次相遇便是入环处   （数学推导，不必深究）
+            fast = fast.next;
+            low = low.next;
+        }
+
+        return fast;
+    }
+
+    //①如果两个链表都无环，返回第一个交点，没有则返回null
+    public static Node noLoop(Node head1, Node head2) {
+        if (head1 == null || head2 == null) return null;
+
+        Node n1 = head1;
+        Node n2 = head2;
+        int n = 0;
+
+        while (n1.next != null) {  //求出第一个链表的 尾节点 长度
+            n++;
+            n1 = n1.next;
+        }
+
+        while (n2.next != null) {
+            n--;
+            n2 = n2.next;
+        }
+
+        if (n1 != n2) return null;   //这里 如果两个链表的尾节点不同，就一定不相交，直接返回null
+
+        n1 = n > 0 ? head1 : head2;
+        n2 = n < 0 ? head1 : head2;
+        n = Math.abs(n);
+
+        for (int i = 0; i < n; i++) {   //长的先走他比短的多的节点，直到长度相等
+            n1 = n1.next;
+        }
+
+        while (n1 != n2) {   //长度相等后，开始逐个判断，节点是否相等
+            n1 = n1.next;
+            n2 = n2.next;
+        }
+
+        return n1;
+    }
+
+    //②一个有环，一个无环，不可能相交，直接返回null就可
+    public static Node oneLoop(Node head1, Node head2) {
+        return null;
+    }
+
+    //③两个都有环，求是否相交，及相交的第一个节点
+    public static Node bothLoop(Node head1, Node head2, Node loop1, Node loop2) {
+        Node n1 = head1;
+        Node n2 = head2;
+        Node local = loop1;
+
+        if (loop1 == loop2) {  //第二种情况，及入环点是同一位置，则相当于无环判断交点
+            int n = 0;
+            while (n1 != loop1) {
+                n++;
+                n1 = n1.next;
+            }
+
+            while (n2 != loop2) {
+                n--;
+                n2 = n2.next;
+            }
+
+            n1 = n > 0 ? head1 : head2;
+            n2 = n < 0 ? head1 : head2;
+            n = Math.abs(n);
+
+            for (int i = 0; i < n; i++) {   //长的先走他比短的多的节点，直到长度相等
+                n1 = n1.next;
+            }
+
+            while (n1 != n2) {   //长度相等后，开始逐个判断，节点是否相等
+                n1 = n1.next;
+                n2 = n2.next;
+            }
+
+            return n1;
+        }
+
+        loop1 = loop1.next;
+        while (loop1 != loop2 && loop1 != local) {  //判断loop1走一圈，是否会遇到loop2，如果遇到，返回任一即可，没遇到，则为null
+            loop1 = loop1.next;
+        }
+
+        return loop1 == loop2 ? loop1 : null;
+    }
+
+    public static void main(String[] args) {
+        Node n1 = new Node(1);
+        Node n2 = new Node(2);
+        Node n3 = new Node(3);
+        Node n4 = new Node(4);
+        Node n5 = new Node(5);
+        n1.next=n2;
+        n2.next=n3;
+        n3.next=n4;
+        n4.next=n5;
+        n5.next=n3;
+
+        Node n = getIntersectNode(n1, n2);
+        System.out.println(n.value);
+    }
+}
