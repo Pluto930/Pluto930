@@ -1,0 +1,72 @@
+import java.util.HashMap;
+
+/*
+复制一个新链表，链表是由下一节点和随即节点
+ */
+public class CopyNodeTest {
+    private static class Node {
+        public int value;
+        public Node next;
+        public Node rand;  //随机指针
+
+        public Node(int data) {
+            this.value = data;
+        }
+    }
+
+    public static Node copyListWithRand1(Node head) {   //利用哈希Map  空间复杂度 O（N）
+        HashMap<Node, Node> hashMap = new HashMap<>();
+        Node cur = head;
+        while (cur != null) {  //全部填充进Map
+            hashMap.put(cur, new Node(cur.value));
+            cur = cur.next;
+        }
+        cur = head;  //再指回头节点
+
+        while (cur != null) {
+            //cur 老
+            //hashMap.get(cur)  新
+            hashMap.get(cur).next = hashMap.get(cur.next);  //hashmap的值，即新节点，的next等于老节点对应的next节点对应的值
+            hashMap.get(cur).rand = hashMap.get(cur.rand);
+            cur = cur.next;
+        }
+
+        return hashMap.get(head);
+    }
+
+    public static Node copyListWithRand2(Node head) {  //不需要哈希Map 添加新节点放在老节点的next上，老节点的next变成新节点的next，即老节点的next.next
+        if (head == null) {
+            return null;
+        }
+
+        Node cur = head;
+        Node next = null;
+
+        while (cur != null) {   //生成一个一个的新节点 挂在老节点后方，然后新节点的next是下一个老节点   1->1`->2->2`->3->3`->null
+            next = cur.next;
+            cur.next = new Node(cur.value);
+            cur.next.next = next;
+            cur = next;
+        }
+        cur = head;
+        Node curCopy = null;
+
+        while (cur != null) {    //将每个新节点的rand属性赋值，就是对应的老节点的rand的next
+            next = cur.next.next;
+            curCopy = cur.next;
+            curCopy.rand = cur.rand != null ? cur.rand.next : null;
+            cur = next;
+        }
+
+        Node res = head.next;
+        cur = head;
+        while (cur != null & cur.next != null) {  //分离。使两边都包含各自节点 curCopy是cur的next  res指向的最开始的新节点的头节点。
+            next = cur.next.next;
+            curCopy = cur.next;
+            cur.next = next;
+            curCopy.next = next != null ? next.next : null;
+            cur=next;
+        }
+        return res;
+    }
+}
