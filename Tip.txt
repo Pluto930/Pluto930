@@ -1,0 +1,11 @@
+
+Comparator的实现：
+    可以用lambda表达式代替
+    import java.util.PriorityQueue;
+    PriorityQueue<Integer> minpq = new PriorityQueue<>();   //小根堆
+    PriorityQueue<Integer> maxpq=new PriorityQueue<>((x,y) -> {return y-x;});   //大根堆
+
+    这样省去了comparator的实现，也不用导入，用时更快
+
+栈：
+    Deque<> stack=new LinkedList<>();
